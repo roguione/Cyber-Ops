@@ -1,0 +1,11 @@
+# Justin H worked with Geneva, Sierra, and Nick A
+# Automatic OS Updates
+# https://pureinfotech.com/install-windows-10-update-powershell/
+# https://www.nakivo.com/blog/automate-windows-updates-using-powershell-short-overview/
+
+Install-Module PSWindowsUpdate
+Get-WindowsUpdate -AcceptAll -Install -AutoReboot
+# Should say true 
+Get-WUServiceManager
+
+Write-Host "Updates are completed"
