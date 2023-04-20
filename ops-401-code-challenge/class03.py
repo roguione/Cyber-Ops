@@ -11,7 +11,6 @@ import smtplib
 import subprocess
 from getpass import getpass
 
-
 # Get target IP address from user
 target_ip = input("Enter the target IP address: ")
 
@@ -102,8 +101,8 @@ while True:
         success = 0
         failure = 0
     
-    # Wait for 2 seconds before sending the next packet
-    time.sleep(2)
+    # Wait for 20 seconds before sending the next packet
+    time.sleep(30)
 
 # Close SMTP session
 smtp_session.quit()
