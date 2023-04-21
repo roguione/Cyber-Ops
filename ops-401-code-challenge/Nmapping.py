@@ -1,32 +1,34 @@
 #!/usr/bin/env python3
-# Nmap mapping script
+# Nmap mapping/vulnerability scan script
 # Is called when uptime sensor declares UP for 5 mins
+# Saves results to desktop
 
+import nmap
 import os
 
-# Define target subnet
-subnet = "192.168.0.0/24"
+# Define target subnet to scan
+subnet = "192.168.1.0/24"
 
-# Function to scan network and return list of live hosts
-def scan_network(subnet):
-    # Use nmap to scan the network for live hosts
-    cmd = f"nmap -sn {subnet}"
-    output = os.popen(cmd).read()
-    # Parse the output to extract live hosts
-    hosts = []
-    for line in output.splitlines():
-        if "Nmap scan report for" in line:
-            parts = line.split()
-            host = parts[4]
-            hosts.append(host)
-    # Return the list of live hosts
-    return hosts
+# Create Nmap scanner object
+nm = nmap.PortScanner()
 
-# Call the scan_network function and print the list of live hosts
-hosts = scan_network(subnet)
-if len(hosts) == 0:
-    print("No live hosts found on network")
-else:
-    print("Live hosts on network:")
-    for host in hosts:
-        print(host)
+# Use Nmap to scan target subnet and identify live hosts
+nm.scan(hosts=subnet, arguments='-sn')
+
+# Create a list to store vulnerability scan results
+results = []
+
+# Loop through identified live hosts and run Nmap vulnerability scan
+for host in nm.all_hosts():
+    if nm[host]['status']['state'] == 'up':
+        print(f"Scanning {host} for vulnerabilities...")
+        # Run Nmap vulnerability scan on live host
+        output = os.popen(f"nmap -Pn -sV --script vuln {host}").read()
+        # Append vulnerability scan results to list
+        results.append(f"Results for {host}:\n{output}\n")
+
+# Save results to a text file on the desktop
+with open(os.path.join(os.path.expanduser("~"), "Desktop", "vulnerability_scan_results.txt"), "w") as f:
+    f.writelines(results)
+    print("Results saved to vulnerability_scan_results.txt on the desktop.")
+
