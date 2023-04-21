@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-# Nmap mapping/vulnerability scan script
+
+# Nmap mapping/vulnerability Stealth scan script
 # Is called when uptime sensor declares UP for 5 mins
 # Saves results to desktop
+# Note that while using Nmap stealth scan, it may not completely evade detection
+# Therefore, it is important to have appropriate authorization
+# Eollow the legal and ethical guidelines before performing any network scans
+# Especially if your network is monitored for suspicious activities
 
 import nmap
 import os
@@ -23,7 +28,7 @@ for host in nm.all_hosts():
     if nm[host]['status']['state'] == 'up':
         print(f"Scanning {host} for vulnerabilities...")
         # Run Nmap vulnerability scan on live host
-        output = os.popen(f"nmap -Pn -sV --script vuln {host}").read()
+        output = os.popen(f"nmap -sS -sV -T2 -p- -R --randomize-hosts --min-rate=20 {host} --script vuln").read()
         # Append vulnerability scan results to list
         results.append(f"Results for {host}:\n{output}\n")
 
@@ -31,4 +36,5 @@ for host in nm.all_hosts():
 with open(os.path.join(os.path.expanduser("~"), "Desktop", "vulnerability_scan_results.txt"), "w") as f:
     f.writelines(results)
     print("Results saved to vulnerability_scan_results.txt on the desktop.")
+
 
