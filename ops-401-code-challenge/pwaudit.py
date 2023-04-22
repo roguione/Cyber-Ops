@@ -10,7 +10,7 @@ import paramiko
 import time
 
 # Set the IP address of the target machine
-target_ip = "192.168.1.100"
+target_ip = "192.168.1.115"
 
 # Set the SSH username and password for the target machine
 ssh_username = "root"

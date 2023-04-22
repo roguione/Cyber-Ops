@@ -12,7 +12,7 @@ import nmap
 import os
 
 # Define target subnet to scan
-subnet = "192.168.1.0/24"
+subnet = "192.168.1.115/24"
 
 # Create Nmap scanner object
 nm = nmap.PortScanner()
