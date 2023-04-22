@@ -101,8 +101,8 @@ while True:
         success = 0
         failure = 0
     
-    # Wait for 20 seconds before sending the next packet
-    time.sleep(30)
+    # Wait for 5 seconds before sending the next packet
+    time.sleep(5)
 
 # Close SMTP session
 smtp_session.quit()
