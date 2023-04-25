@@ -18,8 +18,11 @@ print("1. Yes")
 print("2. No")
 vuln_scan_option = input("Enter the number of the option you choose: ")
 
-# Prompt user for sudo password
-sudo_pass = getpass.getpass(prompt="Enter sudo password: ")
+# Prompt user for root password if necessary
+if scan_type in ["2", "3", "4", "5"]:
+    root_pass = getpass.getpass(prompt="Enter root password: ")
+else:
+    root_pass = None
 
 # Use Nmap to scan target subnet and identify live hosts and open ports
 nm = nmap.PortScanner()
@@ -54,22 +57,19 @@ for host in nm.all_hosts():
 # Perform quick vulnerability scan if option is selected and at least one host is found
 if vuln_scan_option == "1" and results:
     # Install required packages
-    os.system(f"echo {sudo_pass} | sudo -S apt-get update")
-    os.system(f"echo {sudo_pass} | sudo -S apt-get install -y nmap")
-    os.system(f"echo {sudo_pass} | sudo -S apt-get install -y npm")
-    os.system(f"echo {sudo_pass} | sudo -S npm install -g retire")
+    if root_pass:
+        os.system(f"echo {root_pass} | sudo -S apt-get update")
+        os.system(f"echo {root_pass} | sudo -S apt-get install -y nmap")
+        os.system(f"echo {root_pass} | sudo -S apt-get install -y npm")
+        os.system(f"echo {root_pass} | sudo -S npm install -g retire")
     
     # Iterate through hosts and run vulnerability scan
     for host in nm.all_hosts():
         if nm[host].state() == "up":
             print(f"Scanning {host} for vulnerabilities...")
-            os.system(f"echo {sudo_pass} | sudo -S nmap -sV --script=vulners --script-args mincvss=7.0 {host}")
+            if root_pass:
+                os.system(f"echo {root_pass} | sudo -S nmap -sV --script=vulners --script-args mincvss=7.0 {host}")
+            else:
+                os.system(f"nmap -sV --script=vulners --script-args mincvss=7.0 {host}")
 else:
-    print("No vulnerabilities found.")
-
-# Save scan results to a text file on desktop
-desktop_path = os.path.join(os.path.expanduser("~/Desktop"), "scan_results.txt")
-with open(desktop_path, "w") as file:
-    for result in results:
-        file.write(f"{result[0]}:{result[1]}\n")
-print(f"Scan results saved to {desktop_path}")
+    print("Scan completed.")
