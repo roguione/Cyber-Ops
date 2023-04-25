@@ -28,7 +28,7 @@ for host in nm.all_hosts():
     if nm[host]['status']['state'] == 'up':
         print(f"Scanning {host} for vulnerabilities...")
         # Run Nmap vulnerability scan on live host
-        output = os.popen(f"nmap -sS -sV -T2 -p- -R --randomize-hosts --min-rate=20 {host} --script vuln").read()
+        output = os.popen(f"sudo nmap -sS -sV -T2 -p- -R --randomize-hosts --min-rate=20 {host} --script vuln").read()
         # Append vulnerability scan results to list
         results.append(f"Results for {host}:\n{output}\n")
 
