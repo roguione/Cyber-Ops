@@ -1,54 +1,75 @@
-#!/usr/bin/env python3
-
-# Nmap mapping/vulnerability scan script
-# Scans the local network for live hosts and open ports, and performs a quick vulnerability scan on each host found
-# Saves results to desktop
-# Note that while using Nmap stealth scan, it may not completely evade detection
-# Therefore, it is important to have appropriate authorization
-# Follow the legal and ethical guidelines before performing any network scans
-# Especially if your network is monitored for suspicious activities
-
 import nmap
 import os
 import getpass
 
-# Define target subnet to scan
-subnet = input("Enter target subnet to scan (e.g. 192.168.1.0/24): ")
-
-# Create Nmap scanner object
-nm = nmap.PortScanner()
-
-# Prompt user to choose from a list of scan options
-print("Choose scan type:")
-print("1. TCP connect scan (-sT)")
+# Prompt user for network to scan and scan type
+subnet = input("Enter the subnet to scan (ex. 192.168.1.0/24): ")
+print("Choose the type of network scan:")
+print("1. Ping scan (-sn)")
 print("2. TCP SYN scan (-sS)")
-scan_option = input("Enter option number: ")
+print("3. TCP connect scan (-sT)")
+print("4. UDP scan (-sU)")
+print("5. Comprehensive scan (-sS -sV -sC)")
+scan_type = input("Enter the number of the scan type to use: ")
+
+# Prompt user for vulnerability scan option
+print("Would you like to perform a quick vulnerability scan if any hosts are found?")
+print("1. Yes")
+print("2. No")
+vuln_scan_option = input("Enter the number of the option you choose: ")
+
+# Prompt user for sudo password
+sudo_pass = getpass.getpass(prompt="Enter sudo password: ")
 
 # Use Nmap to scan target subnet and identify live hosts and open ports
-if scan_option == "1":
-    # TCP connect scan
-    nm.scan(hosts=subnet, arguments='-sT -Pn')
-elif scan_option == "2":
-    # TCP SYN scan
-    nm.scan(hosts=subnet, arguments='-sS -T4 -Pn')
+nm = nmap.PortScanner()
+if scan_type == "1":
+    nm.scan(hosts=subnet, arguments="-sn")
+elif scan_type == "2":
+    nm.scan(hosts=subnet, arguments="-sS")
+elif scan_type == "3":
+    nm.scan(hosts=subnet, arguments="-sT")
+elif scan_type == "4":
+    nm.scan(hosts=subnet, arguments="-sU")
+elif scan_type == "5":
+    nm.scan(hosts=subnet, arguments="-sS -sV -sC")
 else:
-    print("Invalid option. Exiting.")
+    print("Invalid scan type entered. Please enter a number between 1 and 5.")
     exit()
 
 # Create a list to store scan results
 results = []
 
-# Loop through identified live hosts and run quick vulnerability scan
+# Iterate through hosts and open ports and append to results list
 for host in nm.all_hosts():
-    if nm[host]['status']['state'] == 'up':
-        print(f"\nScanning {host} for vulnerabilities...")
-        # Run Nmap vulnerability scan on live host with sudo
-        password = getpass.getpass(prompt="Enter password to run vulnerability scan: ")
-        output = os.popen(f"echo {password} | sudo -S nmap -sV --script=vuln {host}").read()
-        # Append vulnerability scan results to list
-        results.append(f"\nResults for {host}:\n{output}")
+    if nm[host].state() == "up":
+        print(f"Host {host} is up.")
+        for proto in nm[host].all_protocols():
+            ports = nm[host][proto].keys()
+            for port in ports:
+                if nm[host][proto][port]['state'] == "open":
+                    print(f"Port {port} is open.")
+                    results.append((host, port))
 
-# Save results to a text file on the desktop
-with open(os.path.join(os.path.expanduser("~"), "Desktop", "scan_results.txt"), "w") as f:
-    f.writelines(results)
-    print("Results saved to scan_results.txt on the desktop.")
+# Perform quick vulnerability scan if option is selected and at least one host is found
+if vuln_scan_option == "1" and results:
+    # Install required packages
+    os.system(f"echo {sudo_pass} | sudo -S apt-get update")
+    os.system(f"echo {sudo_pass} | sudo -S apt-get install -y nmap")
+    os.system(f"echo {sudo_pass} | sudo -S apt-get install -y npm")
+    os.system(f"echo {sudo_pass} | sudo -S npm install -g retire")
+    
+    # Iterate through hosts and run vulnerability scan
+    for host in nm.all_hosts():
+        if nm[host].state() == "up":
+            print(f"Scanning {host} for vulnerabilities...")
+            os.system(f"echo {sudo_pass} | sudo -S nmap -sV --script=vulners --script-args mincvss=7.0 {host}")
+else:
+    print("No vulnerabilities found.")
+
+# Save scan results to a text file on desktop
+desktop_path = os.path.join(os.path.expanduser("~/Desktop"), "scan_results.txt")
+with open(desktop_path, "w") as file:
+    for result in results:
+        file.write(f"{result[0]}:{result[1]}\n")
+print(f"Scan results saved to {desktop_path}")
