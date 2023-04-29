@@ -169,7 +169,7 @@ while True:
         print(f"File not found: {e.filename}")
         continue
 
-    except Exception as e:
-        print(e)
-        break
+except Exception as e:
+    print(e)
+    break
 
