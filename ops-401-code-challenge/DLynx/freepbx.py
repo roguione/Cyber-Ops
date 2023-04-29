@@ -118,7 +118,7 @@ while True:
         f.write(f"context=from-internal\n")
     result = subprocess.run(["sudo", "asterisk", "-rx", "sip reload"], capture_output=True)
     if result.returncode != 0:
-    raise Exception(f"Error running command: {result.stderr.decode().strip()}")
+        raise Exception(f"Error running command: {result.stderr.decode().strip()}")
     print("SIP trunk configured successfully.")
 
     # Configure an outbound route for the new extension
@@ -169,7 +169,7 @@ while True:
         print(f"File not found: {e.filename}")
         continue
 
-except Exception as e:
-    print(e)
-    break
+    except Exception as e:
+        print(e)
+        break
 
