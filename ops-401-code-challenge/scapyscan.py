@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from scapy.all import
+from scapy.all import *
 import os
 
 # Ask for host IP and port range to scan
@@ -55,7 +55,9 @@ print(f"Filtered ports: {filtered_ports}")
 # Ask if user wants to save results to desktop
 save_results = input("Do you want to save the scan results to your desktop? (Y/N): ")
 if save_results.upper() == "Y":
-    desktop_path = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
+    # Save results to a file in the "results" subdirectory of the current working directory
+    desktop_path = os.path.join(os.getcwd(), "results")
+    os.makedirs(desktop_path, exist_ok=True)  # create directory if it doesn't exist
     filename = input("Enter a filename for the results (without the file extension): ")
     filepath = os.path.join(desktop_path, f"{filename}.txt")
     with open(filepath, "w") as f:
