@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-# Jutin H, Sierra, Nick A, and Geneva
+# Jutin H
 # Uptime Sensor
 # 04/19/23
 
